@@ -1,0 +1,7 @@
+{
+"functions": {
+"api/ltp.js": {
+"maxDuration": 10
+}
+}
+}

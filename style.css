@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+  }
+
+body {
+margin: 0;
+font-family: Arial, sans-serif;
+background: #f5f5f5;
+}
+
+.container {
+width: 100%;
+max-width: 500px;
+margin: 0 auto;
+padding: 30px 20px;
+}
+
+h1 {
+text-align: center;
+margin-bottom: 25px;
+}
+
+.search-box {
+display: flex;
+gap: 10px;
+}
+
+input {
+flex: 1;
+padding: 14px;
+border: 1px solid #ccc;
+border-radius: 8px;
+font-size: 16px;
+}
+
+button {
+padding: 14px 18px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+background: #111;
+color: white;
+font-size: 15px;
+}
+
+button:disabled {
+opacity: 0.6;
+}
+
+.card {
+margin-top: 25px;
+padding: 30px;
+background: white;
+border-radius: 15px;
+text-align: center;
+box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+}
+
+.symbol {
+font-size: 18px;
+font-weight: bold;
+}
+
+.price {
+margin-top: 15px;
+font-size: 40px;
+font-weight: bold;
+}
+
+.status {
+margin-top: 12px;
+color: #777;
+font-size: 14px;
+}
