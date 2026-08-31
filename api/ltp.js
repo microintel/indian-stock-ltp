@@ -1,4 +1,30 @@
 export default async function handler(req, res) {
+
+  // ==============================
+  // CORS
+  // ==============================
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  // Browser CORS preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  // Only GET allowed
+  if (req.method !== "GET") {
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
+  }
+
+  // ==============================
+  // Get stock symbol
+  // ==============================
   const symbol = String(req.query.symbol || "")
     .trim()
     .toUpperCase();
@@ -9,12 +35,20 @@ export default async function handler(req, res) {
     });
   }
 
+  // ==============================
+  // Yahoo Finance symbol
+  // ==============================
   const yahooSymbol = `${symbol}.NS`;
 
   const url =
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1m`;
+    `https://query1.finance.yahoo.com/v8/finance/chart/` +
+    `${encodeURIComponent(yahooSymbol)}?range=1d&interval=1m`;
 
   try {
+
+    // ==============================
+    // Fetch Yahoo Finance
+    // ==============================
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -26,6 +60,9 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // ==============================
+    // Get chart result
+    // ==============================
     const result = data?.chart?.result?.[0];
 
     if (!result) {
@@ -34,6 +71,9 @@ export default async function handler(req, res) {
       });
     }
 
+    // ==============================
+    // Get LTP
+    // ==============================
     const ltp = result.meta?.regularMarketPrice;
 
     if (typeof ltp !== "number") {
@@ -42,6 +82,9 @@ export default async function handler(req, res) {
       });
     }
 
+    // ==============================
+    // Return response
+    // ==============================
     return res.status(200).json({
       symbol,
       yahooSymbol,
@@ -49,7 +92,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
+
+    console.error("LTP API Error:", error);
 
     return res.status(500).json({
       error: "Unable to fetch Yahoo Finance data"
