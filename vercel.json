@@ -2,6 +2,9 @@
 "functions": {
 "api/ltp.js": {
 "maxDuration": 10
+},
+"api/chart.js": {
+"maxDuration": 10
 }
 }
 }

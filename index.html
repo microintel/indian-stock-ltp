@@ -2,6 +2,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Indian Stock LTP</title>  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head><body>  <main class="container"><h1>Indian Stock LTP</h1>
 
 <div class="search-box">
@@ -27,9 +28,25 @@
     ₹--
   </div>
 
+  <div id="change" class="change">
+  </div>
+
   <div id="status" class="status">
     Ready
   </div>
+
+</div>
+
+<div class="card chart-card">
+
+  <div class="range-tabs">
+    <button class="range-btn" data-range="3mo">3M</button>
+    <button class="range-btn active" data-range="1y">1Y</button>
+    <button class="range-btn" data-range="5y">5Y</button>
+    <button class="range-btn" data-range="max">MAX</button>
+  </div>
+
+  <canvas id="priceChart" height="220"></canvas>
 
 </div>
 
