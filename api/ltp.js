@@ -85,11 +85,22 @@ export default async function handler(req, res) {
     // ==============================
     // Return response
     // ==============================
-    return res.status(200).json({
+    const body = {
       symbol,
       yahooSymbol,
       ltp
-    });
+    };
+
+    // Optional: /api/ltp?symbol=RELIANCE&logo=true adds the logo image URL.
+    // Without it, the response is exactly the same as before.
+    const logoFlag = String(req.query.logo || "").toLowerCase();
+    if (logoFlag === "true" || logoFlag === "1") {
+      const proto = req.headers["x-forwarded-proto"] || "https";
+      body.logo =
+        `${proto}://${req.headers.host}/api/logo?symbol=${encodeURIComponent(symbol)}`;
+    }
+
+    return res.status(200).json(body);
 
   } catch (error) {
 
