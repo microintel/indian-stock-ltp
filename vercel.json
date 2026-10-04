@@ -5,6 +5,9 @@
 },
 "api/chart.js": {
 "maxDuration": 10
+},
+"api/logo.js": {
+"maxDuration": 10
 }
 }
 }
