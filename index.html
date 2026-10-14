@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="Indian Stock LTP — look up Indian stock prices, charts, company details and logos.">
-  <title>Indian Stock LTP — Microintel</title>
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="MicroStock — Indian stock prices, charts, company details and logos.">
+  <title>MicroStock — by Microintel</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  
   <main class="page-shell">
     <header class="topbar">
       <a class="brand" href="/" aria-label="Indian Stock LTP home">
         <span class="brand-mark">₹</span>
-        <span class="brand-copy"><strong>MarketLens</strong><small>INDIAN STOCK LTP</small></span>
+        <span class="brand-copy"><strong>MicroStock</strong><small>INDIAN STOCK DATA</small></span>
       </a>
       <div class="topbar-actions">
         <span class="live-pill"><span class="live-dot"></span> API explorer</span>
@@ -98,7 +98,7 @@
     </section>
 
     <footer class="footer">
-      <a class="footer-brand" href="https://github.com/microintel/indian-stock-ltp" target="_blank" rel="noreferrer">MarketLens <span>API</span></a>
+      <a class="footer-brand" href="https://github.com/microintel/indian-stock-ltp" target="_blank" rel="noreferrer">MicroStock <span>API</span></a>
       <p>Designed for exploring Indian stock data.</p>
       <p class="credit">Developed by <a href="https://github.com/microintel" target="_blank" rel="noreferrer">Microintel</a></p>
     </footer>
@@ -110,18 +110,23 @@
       const root = document.documentElement;
       const toggle = document.getElementById('themeToggle');
       const themeColor = document.querySelector('meta[name="theme-color"]');
-      const saved = localStorage.getItem('marketlens-theme');
+      const saved = localStorage.getItem('microstock-theme');
       const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
       function setTheme(theme) {
         root.dataset.theme = theme;
         toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-        if (themeColor) themeColor.content = theme === 'dark' ? '#0b1020' : '#f5f7fb';
-        localStorage.setItem('marketlens-theme', theme);
-        if (window.priceChart) {
-          window.priceChart.options.scales.x.ticks.color = getComputedStyle(root).getPropertyValue('--muted');
-          window.priceChart.options.scales.y.ticks.color = getComputedStyle(root).getPropertyValue('--muted');
-          window.priceChart.options.scales.y.grid.color = getComputedStyle(root).getPropertyValue('--chart-grid');
-          window.priceChart.update('none');
+        if (themeColor) themeColor.content = theme === 'dark' ? '#000000' : '#f5f7fb';
+        localStorage.setItem('microstock-theme', theme);
+        const chart = window.microStockChart;
+        if (chart && chart.options && chart.options.scales) {
+          const muted = getComputedStyle(root).getPropertyValue('--muted').trim();
+          const grid = getComputedStyle(root).getPropertyValue('--chart-grid').trim();
+          if (chart.options.scales.x) chart.options.scales.x.ticks.color = muted;
+          if (chart.options.scales.y) {
+            chart.options.scales.y.ticks.color = muted;
+            chart.options.scales.y.grid.color = grid;
+          }
+          chart.update('none');
         }
       }
       setTheme(saved || (prefersLight ? 'light' : 'dark'));
@@ -142,19 +147,20 @@
         logo.style.visibility = 'visible';
         logo.src = '/api/logo?symbol=' + encodeURIComponent(symbol);
         logo.alt = symbol + ' logo';
-        fetch('/api/ltp?symbol=' + encodeURIComponent(symbol) + '&details=1')
-          .then(r => r.ok ? r.json() : Promise.reject(new Error('Details unavailable')))
+
+        // Company metadata/logo are independent from the live quote endpoint.
+        fetch('/api/logo?symbol=' + encodeURIComponent(symbol) + '&json=1')
+          .then(r => r.ok ? r.json() : Promise.reject(new Error('Company metadata unavailable')))
           .then(data => {
-            name.textContent = data.companyName || data.name || data.company || data.symbol || symbol;
-            meta.textContent = [data.exchange, data.isin ? 'ISIN ' + data.isin : ''].filter(Boolean).join(' · ') || 'Company profile · Logo via GitHub';
+            name.textContent = data.companyName || data.name || data.symbol || symbol;
+            meta.textContent = [data.exchange, data.isin ? 'ISIN ' + data.isin : '', data.source === 'github' ? 'GitHub logo' : 'Logo fallback'].filter(Boolean).join(' · ') || 'Company profile';
             exchange.textContent = data.exchange || 'IND';
             if (data.logo) logo.src = data.logo;
             companyStatus.textContent = 'Company profile loaded';
           })
           .catch(() => {
-            // The original LTP endpoint remains responsible for displaying price status/errors.
-            companyStatus.textContent = 'Logo lookup requested';
-            meta.textContent = 'Company profile · Logo via GitHub';
+            meta.textContent = 'Company details unavailable · Showing symbol';
+            companyStatus.textContent = 'Profile metadata unavailable';
           });
       }
       document.getElementById('getPriceBtn').addEventListener('click', loadCompany);
