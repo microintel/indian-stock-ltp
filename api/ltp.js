@@ -1,3 +1,35 @@
+import stockData from "./stock-data.json" with { type: "json" };
+
+const GITHUB_LOGOS_BASE =
+  "https://raw.githubusercontent.com/microintel/indian-stock-ltp/main/logos";
+
+function findCompany(input) {
+  const value = String(input || "").trim().toUpperCase();
+  if (!value) return null;
+
+  // Exact ticker match first; prefer NSE because LTP is fetched from Yahoo's .NS ticker.
+  const tickerMatches = stockData.filter(item => String(item.ticker || "").toUpperCase() === value);
+  if (tickerMatches.length) {
+    return tickerMatches.find(item => item.exchange === "NSE") || tickerMatches[0];
+  }
+
+  // Exact company name, then partial name match for natural company-name searches.
+  const exactName = stockData.find(item =>
+    String(item.company_name || "").trim().toUpperCase() === value
+  );
+  if (exactName) return exactName;
+
+  const nameMatches = stockData.filter(item =>
+    String(item.company_name || "").toUpperCase().includes(value)
+  );
+  return nameMatches.find(item => item.exchange === "NSE") || nameMatches[0] || null;
+}
+
+function githubLogoUrl(company) {
+  if (!company || !company.file) return null;
+  return GITHUB_LOGOS_BASE.replace(/\/+$/, "") + "/" + company.file.replace(/^\/+/, "");
+}
+
 export default async function handler(req, res) {
 
   // ==============================
@@ -25,15 +57,18 @@ export default async function handler(req, res) {
   // ==============================
   // Get stock symbol
   // ==============================
-  const symbol = String(req.query.symbol || "")
-    .trim()
-    .toUpperCase();
+  const searchTerm = String(req.query.symbol || req.query.company || "")
+    .trim();
 
-  if (!symbol) {
+  if (!searchTerm) {
     return res.status(400).json({
       error: "Stock symbol is required"
     });
   }
+
+  // Resolve either a ticker or company name through the bundled metadata.
+  const company = findCompany(searchTerm);
+  const symbol = company?.ticker || searchTerm.toUpperCase();
 
   // ==============================
   // Yahoo Finance symbol
@@ -91,13 +126,24 @@ export default async function handler(req, res) {
       ltp
     };
 
-    // Optional: /api/ltp?symbol=RELIANCE&logo=true adds the logo image URL.
-    // Without it, the response is exactly the same as before.
+    // Preserve the original response for ordinary ticker-only requests.
+    // Company-name searches return company metadata; details=1 or logo=true
+    // opts ticker searches into the same expanded response.
     const logoFlag = String(req.query.logo || "").toLowerCase();
-    if (logoFlag === "true" || logoFlag === "1") {
+    const wantsDetails =
+      Boolean(company && searchTerm.toUpperCase() !== symbol.toUpperCase()) ||
+      String(req.query.details || "") === "1" ||
+      logoFlag === "true" ||
+      logoFlag === "1";
+
+    if (wantsDetails) {
       const proto = req.headers["x-forwarded-proto"] || "https";
-      body.logo =
-        `${proto}://${req.headers.host}/api/logo?symbol=${encodeURIComponent(symbol)}`;
+      body.companyName = company?.company_name || symbol;
+      body.exchange = company?.exchange || "NSE";
+      body.isin = company?.isin || null;
+      body.logo = company
+        ? githubLogoUrl(company)
+        : `${proto}://${req.headers.host}/api/logo?symbol=${encodeURIComponent(symbol)}`;
     }
 
     return res.status(200).json(body);
