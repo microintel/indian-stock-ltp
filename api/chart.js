@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   // ==============================
   const allowedOrigins = [
     "https://microintel.github.io",
-    "http://192.0.0.4:8080"
+    "http://192.0.0.4:8080",
+    "https://indian-stock-ltp.vercel.app"
   ];
 
   const origin = req.headers.origin;
