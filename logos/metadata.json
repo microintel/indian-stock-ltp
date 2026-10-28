@@ -15,6 +15,32 @@
     }
   },
   "logos": [
+  {
+  "id": "NSE:JPL",
+  "exchange": "NSE",
+  "ticker": "JPL",
+  "file": "nse/NSE_JPL.png",
+  "matched": true,
+  "company_name": "Jio Platforms Ltd",
+  "sector": "Communications",
+  "industry": "Wireless Telecommunications",
+  "one_liner": "Jio Platforms Ltd operates in the Wireless Telecommunications industry within the Communications sector.",
+  "one_liner_source": "derived_from_sector_industry",
+  "isin": null,
+  "country": "India",
+  "currency": "INR",
+  "security_type": "stock",
+  "security_subtype": "common",
+  "typespecs": [
+  "common"
+  ],
+  "is_index_symbol": false,
+  "is_index_constituent": false,
+  "indexes": [],
+  "logo_id": "jio-platforms-limited",
+  "source": "tradingview",
+  "source_symbol": "NSE:JPL"
+  },
     {
       "id": "NSE:20MICRONS",
       "exchange": "NSE",
